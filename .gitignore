@@ -1,0 +1,4 @@
+pg-docker-backup
+.env
+*.enc
+*.dump
