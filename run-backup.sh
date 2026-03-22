@@ -14,13 +14,13 @@ else
 fi
 
 # check backup path
-if [ -z "${BACKUP_DIR:-}" ]; then
+if [ -z "${BACKUP_FOLDER_PATH:-}" ]; then
     echo "BACKUP_DIR not set in .env... use current directory ..."
-    BACKUP_DIR="$SCRIPT_DIR"
+    BACKUP_FOLDER_PATH="$SCRIPT_DIR"
 fi
 
-mkdir -p "$BACKUP_DIR"
-echo "backup directory set to: $BACKUP_DIR"
+mkdir -p "$BACKUP_FOLDER_PATH"
+echo "backup directory set to: $BACKUP_FOLDER_PATH"
 
 echo "starting backup process..."
 "$SCRIPT_DIR/pg-docker-backup" encrypt \

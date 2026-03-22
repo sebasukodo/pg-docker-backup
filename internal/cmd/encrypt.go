@@ -26,8 +26,6 @@ var encryptCmd = &cobra.Command{
 		t := time.Now()
 		timeText := t.Format("060102-1504")
 
-		fmt.Println(backupPath)
-
 		if backupPath != "" {
 			err := os.MkdirAll(backupPath, 0755)
 			if err != nil {
