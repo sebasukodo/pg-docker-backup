@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -18,15 +19,23 @@ import (
 var encryptCmd = &cobra.Command{
 	Use:   "encrypt",
 	Short: "Backup and encrypt a PostgreSQL database from Docker",
-	Long: `Creates a PostgreSQL backup from a Docker container using pg_dump,
-encrypts it using AES-256-GCM, and removes the unencrypted dump file.`,
+	Long:  `Creates a PostgreSQL backup from a Docker container using pg_dump, encrypts it using AES-256-GCM, and removes the unencrypted dump file.`,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		t := time.Now()
 		timeText := t.Format("060102-1504")
 
-		encFileName := fmt.Sprintf("%s-%s.enc", dbName, timeText)
+		fmt.Println(backupPath)
+
+		if backupPath != "" {
+			err := os.MkdirAll(backupPath, 0755)
+			if err != nil {
+				return fmt.Errorf("failed to create backup directory: %w", err)
+			}
+		}
+
+		encFileName := filepath.Join(backupPath, fmt.Sprintf("%s-%s.enc", dbName, timeText))
 
 		if key == "" {
 			return fmt.Errorf("Could not read 'ENCRYPT_KEY' variable.")
@@ -46,20 +55,18 @@ encrypts it using AES-256-GCM, and removes the unencrypted dump file.`,
 			log.Fatal(err)
 		}
 
-		var command string
-		var commandArgs []string
-
-		if dockerMode == "true" {
-			command = "pg_dump"
-			commandArgs = append(commandArgs, "-h", containerName, "-U", dbUser, "-d", dbName, "-Fc")
-		} else {
-			command = "docker"
-			commandArgs = append(commandArgs, "exec", "-e", "PGPASSWORD="+dbPW, containerName, "pg_dump", "-U", dbUser, "-d", dbName, "-Fc")
-		}
-
 		fmt.Println("Running command...")
 
-		dockerCmd := exec.Command(command, commandArgs...)
+		dockerCmd := exec.Command(
+			"docker",
+			"exec", "-e",
+			"PGPASSWORD="+dbPW,
+			containerName,
+			"pg_dump",
+			"-U", dbUser,
+			"-d", dbName,
+			"-Fc",
+		)
 
 		stdout, err := dockerCmd.Output()
 		if err != nil {
@@ -108,5 +115,6 @@ func init() {
 	encryptCmd.Flags().StringVarP(&dbName, "db-name", "n", dbName, "Database Name")
 	encryptCmd.Flags().StringVarP(&dbUser, "db-user", "u", dbUser, "Database Username")
 	encryptCmd.Flags().StringVarP(&dbPW, "db-pw", "p", dbPW, "Database Password")
-	encryptCmd.Flags().StringVarP(&dockerMode, "docker-mode", "m", dockerMode, "Are you running this application inside of a Docker container? - true or false")
+	restoreCmd.Flags().StringVarP(&backupPath, "backup-folder-path", "b", backupPath, "Directory where backups will be stored. Defaults to the current working directory if not specified.")
+
 }

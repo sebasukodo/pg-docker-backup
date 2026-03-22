@@ -12,7 +12,6 @@ The tool uses `pg_dump` to create backups from a PostgreSQL database inside a Do
 - AES-256-GCM encryption for secure backup storage
 - Decrypt previously created backups
 - Restore backups back into a PostgreSQL database
-- Optional Docker mode for future container-in-container usage (experimental)
 
 ---
 
@@ -37,18 +36,18 @@ This generates a **Base64-encoded string** (usually ~44 characters) representing
 3. Add the key as the value of `ENCRYPT_KEY`:
 
 ```env
-ENCRYPT_KEY=your_generated_key_here
+ENCRYPT_KEY=your_generated_key_here==
 ```
 
-Example:
+Example `.env`:
 
 ```env
+BACKUP_FOLDER_PATH=/mnt/pg-backup
 CONTAINER_NAME=my-postgres
 DB_NAME=mydb
 DB_USER=postgres
 DB_PASSWORD=secret
-DOCKER_MODE=false
-ENCRYPT_KEY=3K8kF9yourGeneratedKey
+ENCRYPT_KEY=your_generated_key_here==
 ```
 
 ---
@@ -59,11 +58,6 @@ ENCRYPT_KEY=3K8kF9yourGeneratedKey
 * Store this key in a **secure location** (e.g. password manager or vault)
 * If the key is lost, **your backups cannot be recovered**
 * Never commit your `.env` file to version control
-
-### furthermore:
-
-* `DOCKER_MODE=true` is intended for running the CLI inside a Docker container.
-* This mode is **not fully implemented/tested yet**.
 
 ---
 
@@ -97,8 +91,13 @@ Creates and encrypts a PostgreSQL backup.
 * `-n, --db-name` Database name
 * `-p, --db-pw` Database password
 * `-u, --db-user` Database username
-* `-m, --docker-mode` Run inside Docker container (`true` / `false`)
+* `-b, --backup-folder-path` Directory where backups will be stored (default: current working directory)
 * `-h, --help` Help information
+
+**Notes:**
+
+* All flags are optional if you have configured the corresponding values in your `.env` file.
+* You only need to set these flags manually if you are **not using `.env`** or want to override its values.
 
 ---
 
@@ -112,6 +111,10 @@ Decrypts an encrypted backup file.
 * `-o, --output` Output file (default: `decrypted_backup.dump`)
 * `-h, --help` Help information
 
+**Notes:**
+
+* The `-o, --output` flag is optional.
+
 ---
 
 ## ♻️ Restore Command
@@ -124,17 +127,13 @@ Restores a decrypted PostgreSQL dump into a running container.
 * `-d, --db-name` Database name
 * `-p, --db-pw` Database password
 * `-u, --db-user` Database username
-* `-m, --docker-mode` Run inside Docker container (`true` / `false`)
 * `-f, --file` Path to decrypted backup file (e.g. `decrypted.dump`)
 * `-h, --help` Help information
 
----
+**Notes:**
 
-## 🧪 Docker Mode (Experimental)
-
-The `DOCKER_MODE` / `--docker-mode` flag is intended to allow running this CLI tool inside a Docker container instead of executing commands from the host system.
-
-⚠️ This feature is currently **not fully implemented or tested**.
+* All flags except `-f, --file` are optional if you have configured the corresponding values in your `.env` file.
+* You only need to set these flags manually if you are **not using `.env`** or want to override its values.
 
 ---
 
@@ -149,7 +148,7 @@ The `DOCKER_MODE` / `--docker-mode` flag is intended to allow running this CLI t
 2. Decrypt backup:
 
    ```bash
-   pg-docker-backup decrypt -f backup.enc -o backup.dump
+   pg-docker-backup decrypt -f database-260312-1608.enc -o backup.dump
    ```
 
 3. Restore backup:
@@ -157,6 +156,79 @@ The `DOCKER_MODE` / `--docker-mode` flag is intended to allow running this CLI t
    ```bash
    pg-docker-backup restore -c my-postgres -n mydb -u user -p password -f backup.dump
    ```
+
+---
+
+## ⏱️ Scheduling Backups
+
+You can automate backups using either **Cron** or **systemd timers**.
+
+### Using Cron
+
+To run a backup every 6 hours, add the following line to your user crontab (`crontab -e`):
+
+```bash
+0 */6 * * * /path/to/script/run-backup.sh >> /path/to/script/backup.log 2>&1
+```
+
+**Notes:**
+
+* Replace `/path/to/script/` with the path to where `run-backup.sh` and the `pg-docker-backup` Go binary are located.
+* Output and errors are logged to `backup.log`.
+* To remove the cron job, open `crontab -e` again and delete or comment out the line.
+
+---
+
+### Using systemd timers
+
+1. Create a **service** file: `/etc/systemd/system/pg-docker-backup.service`
+
+```ini
+[Unit]
+Description=Run pg-docker-backup
+
+[Service]
+Type=oneshot
+WorkingDirectory=/path/to/script
+ExecStart=/path/to/script/run-backup.sh
+```
+
+2. Create a **timer** file: `/etc/systemd/system/pg-docker-backup.timer`
+
+```ini
+[Unit]
+Description=Run pg-docker-backup every 6 hours
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=6h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+
+3. Reload systemd and start the timer:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now pg-docker-backup.timer
+```
+
+**Notes:**
+
+* Replace `/path/to/script` with the actual path to where `run-backup.sh` and the `pg-docker-backup` go binary are located.
+* To stop or remove the timer:
+
+```bash
+sudo systemctl stop pg-docker-backup.timer
+sudo systemctl disable pg-docker-backup.timer
+sudo rm /etc/systemd/system/pg-docker-backup.service
+sudo rm /etc/systemd/system/pg-docker-backup.timer
+sudo systemctl daemon-reload
+```
+
+This setup ensures automated, reliable backups every 6 hours.
 
 ---
 

@@ -2,3 +2,4 @@ pg-docker-backup
 .env
 *.enc
 *.dump
+backup.log

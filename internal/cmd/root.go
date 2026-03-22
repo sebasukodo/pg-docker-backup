@@ -14,8 +14,8 @@ var (
 	dbName        string
 	dbUser        string
 	dbPW          string
+	backupPath    string
 	key           string
-	dockerMode    string
 )
 
 var rootCmd = &cobra.Command{
@@ -32,8 +32,8 @@ func Execute() {
 	dbName = env.DBName
 	dbUser = env.DBUser
 	dbPW = env.DBPassword
+	backupPath = env.BckFolderPath
 	key = env.EncryptKey
-	dockerMode = env.DockerMode
 
 	err := rootCmd.Execute()
 	if err != nil {
@@ -60,8 +60,6 @@ func checkValid() error {
 	if dbPW == "" {
 		return fmt.Errorf("--db-pw flag is required if you haven't set Environment Variables")
 	}
-	if dockerMode == "" {
-		return fmt.Errorf("--docker-mode flag is required if you haven't set Environment Variables")
-	}
+
 	return nil
 }

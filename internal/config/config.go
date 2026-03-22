@@ -7,7 +7,7 @@ type Env struct {
 	DBName        string
 	DBUser        string
 	DBPassword    string
-	DockerMode    string
+	BckFolderPath string
 	EncryptKey    string
 }
 
@@ -17,7 +17,7 @@ func Load() *Env {
 		DBName:        os.Getenv("DB_NAME"),
 		DBUser:        os.Getenv("DB_USER"),
 		DBPassword:    os.Getenv("DB_PASSWORD"),
-		DockerMode:    os.Getenv("DOCKER_MODE"),
+		BckFolderPath: os.Getenv("BACKUP_FOLDER_PATH"),
 		EncryptKey:    os.Getenv("ENCRYPT_KEY"),
 	}
 }

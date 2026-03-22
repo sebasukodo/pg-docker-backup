@@ -27,8 +27,6 @@ var restoreCmd = &cobra.Command{
 			return err
 		}
 
-		var command string
-		var commandArgs []string
 		backupFileInsideContainer := "/tmp/decrypted_backup.dump"
 
 		cpBackupToContainer := exec.Command(
@@ -43,15 +41,17 @@ var restoreCmd = &cobra.Command{
 			return fmt.Errorf("could not copy backup to container: %v", err)
 		}
 
-		if dockerMode == "true" {
-			command = "pg_restore"
-			commandArgs = append(commandArgs, containerName, "-d", dbName, "-U", dbUser, "--clean", backupFileInsideContainer)
-		} else {
-			command = "docker"
-			commandArgs = append(commandArgs, "exec", "-e", "PGPASSWORD="+dbPW, containerName, "pg_restore", "-d", dbName, "-U", dbUser, "--clean", backupFileInsideContainer)
-		}
-
-		dockerCmd := exec.Command(command, commandArgs...)
+		dockerCmd := exec.Command(
+			"docker",
+			"exec", "-e",
+			"PGPASSWORD="+dbPW,
+			containerName,
+			"pg_restore",
+			"-d", dbName,
+			"-U", dbUser,
+			"--clean",
+			backupFileInsideContainer,
+		)
 
 		fmt.Println("Running command...")
 
@@ -73,7 +73,6 @@ func init() {
 	restoreCmd.Flags().StringVarP(&dbName, "db-name", "d", dbName, "Database Name")
 	restoreCmd.Flags().StringVarP(&dbUser, "db-user", "u", dbUser, "Database Username")
 	restoreCmd.Flags().StringVarP(&dbPW, "db-pw", "p", dbPW, "Database Password")
-	restoreCmd.Flags().StringVarP(&dockerMode, "docker-mode", "m", dockerMode, "Are you running this application inside of a Docker container?")
 
 	restoreCmd.MarkFlagRequired("file")
 
