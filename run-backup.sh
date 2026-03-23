@@ -29,4 +29,15 @@ echo "starting backup process..."
   -u "$DB_USER" \
   -p "$DB_PASSWORD"
 
+if [ -n "${RSYNC_DEST_HOST:-}" ] && [ -n "${RSYNC_DEST_DIR:-}" ]; then
+    echo "Syncing new backup with $RSYNC_DEST_HOST..."
+
+    rsync -av \
+      -e "ssh" \
+      "$BACKUP_FOLDER_PATH/" \
+      "$RSYNC_DEST_HOST:$RSYNC_DEST_DIR/"
+
+    echo "Sync completed."
+fi
+
 echo "backup done."

@@ -25,29 +25,35 @@ Run the following command in your terminal:
 
 ```bash
 openssl rand -base64 32
-````
+```
 
-This generates a **Base64-encoded string** (usually ~44 characters) representing a secure 32-byte key for AES-256 encryption.
+This generates a **Base64-encoded string** (≈44 characters) representing a secure 32-byte key for AES-256 encryption.
 
-### 2. Configure `.env`
+---
 
-1. Copy the generated key
-2. Open or create your `.env` file
-3. Add the key as the value of `ENCRYPT_KEY`:
+### 2. Create your `.env` file
+
+Copy the example file:
+
+```bash
+cp .env.example .env
+```
+
+---
+
+### 3. Configure `.env`
+
+Open the `.env` file and set your values:
 
 ```env
 ENCRYPT_KEY=your_generated_key_here==
-```
-
-Example `.env`:
-
-```env
 BACKUP_FOLDER_PATH=/mnt/pg-backup
-CONTAINER_NAME=my-postgres
+CONTAINER_NAME=postgres-container
 DB_NAME=mydb
 DB_USER=postgres
 DB_PASSWORD=secret
-ENCRYPT_KEY=your_generated_key_here==
+RSYNC_DEST_HOST=user@127.0.0.1
+RSYNC_DEST_DIR=/home/user/backups/
 ```
 
 ---
@@ -58,6 +64,9 @@ ENCRYPT_KEY=your_generated_key_here==
 * Store this key in a **secure location** (e.g. password manager or vault)
 * If the key is lost, **your backups cannot be recovered**
 * Never commit your `.env` file to version control
+
+* `RSYNC_DEST_HOST` and `RSYNC_DEST_DIR` are optional (enable remote sync if both are set)
+* `BACKUP_FOLDER_PATH` defaults to the working directory if not set
 
 ---
 
