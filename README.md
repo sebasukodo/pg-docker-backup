@@ -47,11 +47,11 @@ Open the `.env` file and set your values:
 
 ```env
 ENCRYPT_KEY=your_generated_key_here==
-BACKUP_FOLDER_PATH=/mnt/pg-backup
 CONTAINER_NAME=postgres-container
 DB_NAME=mydb
 DB_USER=postgres
 DB_PASSWORD=secret
+BACKUP_FOLDER_PATH=/mnt/pg-backup
 RSYNC_DEST_HOST=user@127.0.0.1
 RSYNC_DEST_DIR=/home/user/backups/
 ```
