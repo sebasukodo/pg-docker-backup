@@ -19,7 +19,7 @@ var (
 	toDecryptFilename string
 )
 
-const stdOutputFile = "decrypted_backup.dump"
+const stdOutputFile = "./decrypted_backup.dump"
 
 var decryptCmd = &cobra.Command{
 	Use:   "decrypt",

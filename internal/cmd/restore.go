@@ -35,7 +35,7 @@ var restoreCmd = &cobra.Command{
 			fmt.Sprintf("%v:%v", containerName, backupFileInsideContainer),
 		)
 
-		fmt.Printf("Copying file %v inside container %v", restoreFile, containerName)
+		fmt.Printf("Copying file %v inside container %v...\n", restoreFile, containerName)
 
 		if err := cpBackupToContainer.Run(); err != nil {
 			return fmt.Errorf("could not copy backup to container: %v", err)
@@ -53,7 +53,7 @@ var restoreCmd = &cobra.Command{
 			backupFileInsideContainer,
 		)
 
-		fmt.Println("Running command...")
+		fmt.Println("Running restore command...")
 
 		if err := dockerCmd.Run(); err != nil {
 			return fmt.Errorf("Restore failed: %v", err)
