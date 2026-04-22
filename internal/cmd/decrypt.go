@@ -17,6 +17,7 @@ import (
 var (
 	encryptFilename   string
 	toDecryptFilename string
+	encryptionKey     string
 )
 
 const stdOutputFile = "./decrypted_backup.dump"
@@ -37,8 +38,12 @@ var decryptCmd = &cobra.Command{
 			toDecryptFilename = stdOutputFile
 		}
 
-		if key == "" {
-			return fmt.Errorf("Could not read 'ENCRYPT_KEY' variable.")
+		if key == "" && encryptionKey == "" {
+			return fmt.Errorf("Please set 'ENCRYPT_KEY' in .env or use --encryption-key flag")
+		}
+
+		if encryptionKey != "" {
+			key = encryptionKey
 		}
 
 		fmt.Println("Reading decryption key")
@@ -98,6 +103,7 @@ var decryptCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(decryptCmd)
 
+	decryptCmd.Flags().StringVarP(&encryptionKey, "encryption-key", "e", "", "encryption key (use 'openssl rand -base64 32')")
 	decryptCmd.Flags().StringVarP(&encryptFilename, "file", "f", "", "Path to encrypted file (e.g. ./database-260312-1608.enc)")
 	decryptCmd.Flags().StringVarP(&toDecryptFilename, "output", "o", stdOutputFile, fmt.Sprintf("Output file for decrypted data (default: %v)", stdOutputFile))
 

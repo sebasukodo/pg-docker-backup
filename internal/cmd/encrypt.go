@@ -35,8 +35,12 @@ var encryptCmd = &cobra.Command{
 
 		encFileName := filepath.Join(backupPath, fmt.Sprintf("%s-%s.enc", dbName, timeText))
 
-		if key == "" {
-			return fmt.Errorf("Could not read 'ENCRYPT_KEY' variable.")
+		if key == "" && encryptionKey == "" {
+			return fmt.Errorf("Please set 'ENCRYPT_KEY' in .env or use --encryption-key flag")
+		}
+
+		if encryptionKey != "" {
+			key = encryptionKey
 		}
 
 		fmt.Println("Starting encrypted backup process...")
@@ -109,10 +113,11 @@ var encryptCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(encryptCmd)
 
+	encryptCmd.Flags().StringVarP(&encryptionKey, "encryption-key", "e", "", "encryption key (use 'openssl rand -base64 32')")
 	encryptCmd.Flags().StringVarP(&containerName, "container", "c", containerName, "Docker Container Name")
 	encryptCmd.Flags().StringVarP(&dbName, "db-name", "n", dbName, "Database Name")
 	encryptCmd.Flags().StringVarP(&dbUser, "db-user", "u", dbUser, "Database Username")
 	encryptCmd.Flags().StringVarP(&dbPW, "db-pw", "p", dbPW, "Database Password")
-	restoreCmd.Flags().StringVarP(&backupPath, "backup-folder-path", "b", backupPath, "Directory where backups will be stored. Defaults to the current working directory if not specified.")
+	encryptCmd.Flags().StringVarP(&backupPath, "backup-folder-path", "b", backupPath, "Directory where backups will be stored. Defaults to the current working directory if not specified.")
 
 }
