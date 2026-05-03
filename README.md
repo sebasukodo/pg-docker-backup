@@ -101,7 +101,7 @@ Creates and encrypts a PostgreSQL backup.
 * `-p, --db-pw` Database password
 * `-u, --db-user` Database username
 * `-b, --backup-folder-path` Directory where backups will be stored (default: current working directory)
-* `-e, --encryption-key` If you don't want to use the .env variable
+* `-e, --encryption-key` If you don't want to use the `.env` variable
 * `-h, --help` Help information
 
 **Notes:**
