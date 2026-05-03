@@ -60,7 +60,7 @@ RSYNC_DEST_DIR=/home/user/backups/
 
 ### ⚠️ Important Notes
 
-* The encryption key is **required to decrypt your backups**
+* An encryption key is **required to decrypt your backups**
 * Store this key in a **secure location** (e.g. password manager or vault)
 * If the key is lost, **your backups cannot be recovered**
 * Never commit your `.env` file to version control
@@ -101,6 +101,7 @@ Creates and encrypts a PostgreSQL backup.
 * `-p, --db-pw` Database password
 * `-u, --db-user` Database username
 * `-b, --backup-folder-path` Directory where backups will be stored (default: current working directory)
+* `-e, --encryption-key` If you don't want to use the .env variable
 * `-h, --help` Help information
 
 **Notes:**
@@ -116,6 +117,7 @@ Decrypts an encrypted backup file.
 
 ### Flags:
 
+* `-e, --encryption-key` If you don't want to use the `.env` variable
 * `-f, --file` Path to encrypted file (e.g. `./database-260312-1608.enc`)
 * `-o, --output` Output file (default: `decrypted_backup.dump`)
 * `-h, --help` Help information
@@ -123,6 +125,7 @@ Decrypts an encrypted backup file.
 **Notes:**
 
 * The `-o, --output` flag is optional.
+* The `-e, --encryption-key` flag only needs to be set if you are not using `.env`
 
 ---
 
