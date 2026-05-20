@@ -57,23 +57,23 @@ var decryptCmd = &cobra.Command{
 
 		data, err := os.ReadFile(encryptFilename)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		block, err := aes.NewCipher(encryptKey)
 		if err != nil {
-			panic(err.Error())
+			log.Fatal(err.Error())
 		}
 
 		gcm, err := cipher.NewGCM(block)
 		if err != nil {
-			panic(err.Error())
+			log.Fatal(err.Error())
 		}
 
 		nonceSize := gcm.NonceSize()
 
 		if len(data) < nonceSize {
-			panic("filesize too short to decrypt")
+			log.Fatal("filesize too short to decrypt")
 		}
 
 		nonce := data[:nonceSize]
@@ -83,7 +83,7 @@ var decryptCmd = &cobra.Command{
 
 		plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		fmt.Println("Writing decrypted data into file...")
@@ -91,7 +91,7 @@ var decryptCmd = &cobra.Command{
 		err = os.WriteFile(toDecryptFilename, plaintext, 0644)
 		if err != nil {
 			os.Remove(toDecryptFilename)
-			panic(err)
+			log.Fatal(err)
 		}
 
 		fmt.Printf("Decrypted backup saved in: %s\n", toDecryptFilename)

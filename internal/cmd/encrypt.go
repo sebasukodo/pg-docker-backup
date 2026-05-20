@@ -80,17 +80,17 @@ var encryptCmd = &cobra.Command{
 
 		block, err := aes.NewCipher(encryptKey)
 		if err != nil {
-			panic(err.Error())
+			log.Fatal(err.Error())
 		}
 
 		aesgcm, err := cipher.NewGCM(block)
 		if err != nil {
-			panic(err.Error())
+			log.Fatal(err.Error())
 		}
 
 		nonce := make([]byte, aesgcm.NonceSize())
 		if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-			panic(err.Error())
+			log.Fatal(err.Error())
 		}
 
 		ciphertext := aesgcm.Seal(nonce, nonce, stdout, nil)
@@ -101,7 +101,7 @@ var encryptCmd = &cobra.Command{
 		err = os.WriteFile(encFileName, ciphertext, 0644)
 		if err != nil {
 			os.Remove(encFileName)
-			panic(err)
+			log.Fatal(err)
 		}
 
 		fmt.Printf("Encrypted backup created: %s\n", encFileName)
